@@ -1,0 +1,12 @@
+            "TEST_NFT1": {
+                "name": "TEST_NFT1",
+                "image": "ifps-hash",
+                "mediaType": "image",
+                "description": "Super duper NFT",
+                "geoLocation": "coordonates",
+                "company": "comp",
+                "collection": "winter",
+                "type": "voucher",
+                "rarity": "gold",
+                "subtitle": "frontend-stuff"
+            }
