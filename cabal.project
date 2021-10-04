@@ -1,6 +1,9 @@
-index-state: 2021-04-30T00:00:00Z
+index-state: 2021-08-14T00:00:00Z
 
-packages: .
+packages: ./.
+
+-- You never, ever, want this.
+write-ghc-environment-files: never
 
 package cryptonite
   -- Using RDRAND instead of /dev/urandom as an entropy source for key
@@ -17,12 +20,39 @@ tests: False
 
 test-show-details: direct
 
+-- https://github.com/Quid2/flat/pull/22 fixes a potential exception
+-- when decoding invalid (e.g. malicious) text literals.
 source-repository-package
   type: git
-  location: https://github.com/input-output-hk/cardano-node
-  tag: f6293f3fafd7f494891baa584245c7ebc95d2d62
+  location: https://github.com/Quid2/flat.git
+  tag: ee59880f47ab835dbd73bea0847dab7869fc20d8
+
+-- Needs some patches, but upstream seems to be fairly dead (no activity in > 1 year)
+source-repository-package
+  type: git
+  location: https://github.com/shmish111/purescript-bridge.git
+  tag: 6a92d7853ea514be8b70bab5e72077bf5a510596
+
+-- Plutus revision from 2021/08/16
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/plutus.git
   subdir:
-    cardano-api
+    freer-extras
+    playground-common
+    plutus-core
+    plutus-contract
+    plutus-chain-index
+    plutus-ledger
+    plutus-ledger-api
+    plutus-tx
+    plutus-tx-plugin
+    plutus-pab
+    plutus-use-cases
+    prettyprinter-configurable
+    quickcheck-dynamic
+    word-array
+  tag: plutus-starter-devcontainer/v1.0.9
 
 source-repository-package
   type: git
@@ -31,8 +61,13 @@ source-repository-package
 
 source-repository-package
   type: git
+  location: https://github.com/shmish111/servant-purescript.git
+  tag: a76104490499aa72d40c2790d10e9383e0dbde63
+
+source-repository-package
+  type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: cb0f19c85e5bb5299839ad4ed66af6fa61322cc4
+  tag: 46502694f6a9f0498f822068008b232b3837a9e9
   subdir:
     base-deriving-via
     binary
@@ -53,23 +88,35 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-ledger-specs
-  tag: 12a0ef69d64a55e737fbf4e846bd8ed9fb30a956
+  tag: 8efcfc755faae4db3a64ad45343235fce3ed5c47
   subdir:
-    alonzo/impl
     byron/chain/executable-spec
     byron/crypto
     byron/crypto/test
     byron/ledger/executable-spec
     byron/ledger/impl
     byron/ledger/impl/test
-    cardano-ledger-core
     semantics/executable-spec
     semantics/small-steps-test
     shelley/chain-and-ledger/dependencies/non-integer
     shelley/chain-and-ledger/executable-spec
     shelley/chain-and-ledger/shelley-spec-ledger-test
     shelley-ma/impl
-    shelley-ma/shelley-ma-test
+    cardano-ledger-core
+    alonzo/impl
+
+-- A lot of plutus dependencies have to be synchronized with the dependencies of
+-- cardano-node. If you update cardano-node, please make sure that all dependencies
+-- of cardano-node are also updated.
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-node.git
+  tag: 8cf2b208c7708bd890c7e74d5b1d7c4167a3b40b
+  subdir:
+    cardano-api
+    cardano-node
+    cardano-cli
+    cardano-config
 
 source-repository-package
   type: git
@@ -87,16 +134,26 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/iohk-monitoring-framework
-  tag: 808724ff8a19a33d0ed06f9ef59fbd900b08553c
+  -- Important Note: Read below, before changing this!
+  tag: 46f994e216a1f8b36fe4669b47b2a7011b0e153c
+  -- Are you thinking of updating this tag to some other commit?  Please
+  -- ensure that the commit you are about to use is the latest one from
+  -- the *develop* branch of this repo:
+  --   * <https://github.com/input-output-hk/iohk-monitoring-framework/commits/develop>
+  -- (not master!)
+  --
+  -- In particular we rely on the code from this PR:
+  --  * <https://github.com/input-output-hk/iohk-monitoring-framework/pull/622>
+  -- being merged.
   subdir:
-    contra-tracer
     iohk-monitoring
+    tracer-transformers
+    contra-tracer
     plugins/backend-aggregation
     plugins/backend-ekg
     plugins/backend-monitoring
     plugins/backend-trace-forwarder
     plugins/scribe-systemd
-    tracer-transformers
 
 source-repository-package
   type: git
@@ -106,32 +163,34 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/ouroboros-network
-  tag: f149c1c1e4e4bb5bab51fa055e9e3a7084ddc30e
+  tag: 6d00ff77f9bcd769fb6d7fd02216cec4e837bfcf
   subdir:
-    io-sim
-    io-classes
     monoidal-synchronisation
-    network-mux
+    typed-protocols
+    typed-protocols-examples
+    ouroboros-network
+    ouroboros-network-testing
+    ouroboros-network-framework
     ouroboros-consensus
     ouroboros-consensus-byron
     ouroboros-consensus-cardano
     ouroboros-consensus-shelley
-    ouroboros-network
-    ouroboros-network-framework
-    ouroboros-network-testing
-    typed-protocols
-    typed-protocols-examples
+    io-sim
+    io-classes
+    network-mux
 
 source-repository-package
   type: git
-  location: https://github.com/input-output-hk/plutus
-  tag: 8c83c4abe211b4bbcaca3cdf1b2c0e38d0eb683f
+  location: https://github.com/input-output-hk/plutus.git
+  tag: plutus-starter-devcontainer/v1.0.9
   subdir:
     plutus-core
+    plutus-contract
     plutus-ledger
     plutus-ledger-api
     plutus-tx
     plutus-tx-plugin
+    plutus-pab
     prettyprinter-configurable
     word-array
 
@@ -141,6 +200,11 @@ source-repository-package
   tag: ee59880f47ab835dbd73bea0847dab7869fc20d8
   --sha256: 1lrzknw765pz2j97nvv9ip3l1mcpf2zr4n56hwlz0rk7wq7ls4cm
 
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/optparse-applicative
+  tag: 7497a29cb998721a9068d5725d49461f2bba0e7a
+
 constraints:
     hedgehog >= 1.0
   , bimap >= 0.4.0
@@ -149,6 +213,30 @@ constraints:
     -- systemd-2.3.0 requires at least network 3.1.1.0 but it doesn't declare
     -- that dependency
   , network >= 3.1.1.0
+    -- big breaking change here, inline-r doens't have an upper bound
+  , singletons < 3.0
+  -- bizarre issue: in earlier versions they define their own 'GEq', in newer
+  -- ones they reuse the one from 'some', but there isn't e.g. a proper version
+  -- constraint from dependent-sum-template (which is the library we actually use).
+  , dependent-sum > 0.6.2.0
+
+-- See the note on nix/pkgs/default.nix:agdaPackages for why this is here.
+-- (NOTE this will change to ieee754 in newer versions of nixpkgs).
+extra-packages: ieee, filemanip
+
+-- These packages appear in our dependency tree and are very slow to build.
+-- Empirically, turning off optimization shaves off ~50% build time.
+-- It also mildly improves recompilation avoidance.
+-- For deve work we don't care about performance so much, so this is okay.
+package cardano-ledger-alonzo
+  optimization: False
+package ouroboros-consensus-shelley
+  optimization: False
+package ouroboros-consensus-cardano
+  optimization: False
+package cardano-api
+  optimization: False
+
 
 package comonad
   flags: -test-doctests
@@ -158,3 +246,4 @@ package cardano-ledger-alonzo-test
 
 allow-newer:
   size-based:template-haskell
+  , ouroboros-consensus-byron:formatting

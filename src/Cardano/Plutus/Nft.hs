@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module Cardano.Plutus.Nft (nftMint) where
+module Cardano.Plutus.Nft (
+  nftMint
+  ) where
 
 import           Cardano.Api.Shelley      (PlutusScript (..), PlutusScriptV1)
 import           Codec.Serialise
@@ -10,14 +12,11 @@ import qualified Ledger.Typed.Scripts     as Scripts
 import           Ledger.Value             as Value
 import qualified PlutusTx
 import           PlutusTx.Prelude         hiding (Semigroup (..), unless)
+import qualified Prelude               as Haskell
 
 data ExplorieParams = ExplorieParams
     { epNFT :: AssetClass
-    , epGeoLocation :: Haskell.String
-    , name :: Haskell.String
-    , description :: Haskell.String
-    , image :: Haskell.String
-    } deriving Show
+    } deriving Haskell.Show
 
 PlutusTx.makeLift ''ExplorieParams
 
@@ -68,10 +67,7 @@ nftMint nftTokenName
 mkExplorieValidator :: ExplorieParams -> BuiltinData -> BuiltinData -> ScriptContext -> Bool
 mkExplorieValidator ep _ _ ctx =
     traceIfFalse "NFT missing from input"  (oldNFT   == 1)              &&
-    traceIfFalse "NFT missing from output" (newNFT   == 1)              &&
-    traceIfFalse "image changed"        (oldImage <> newName) &&
-    traceIfFalse "name changed"         (newName <> oldName)   &&
-    traceIfFalse "geo location changed"         (newGeoLocation <> oldGeoLocation)
+    traceIfFalse "NFT missing from output" (newNFT   == 1)              
   where
     ownInput :: TxOut
     ownInput = case findOwnInput ctx of
@@ -87,12 +83,6 @@ mkExplorieValidator ep _ _ ctx =
     inVal = txOutValue ownInput
     outVal = txOutValue ownOutput
 
-    oldNFT, newNFT, oldGeoLocation, newGeoLocation, oldImage, newImage, oldName, newName :: Integer
+    oldNFT, newNFT :: Integer
     oldNFT     = assetClassValueOf inVal  $ epNFT ep
     newNFT     = assetClassValueOf outVal $ epNFT ep
-    oldGeoLocation = assetClassValueOf inVal  $ epGeoLocation ep
-    newGeoLocation = assetClassValueOf outVal $ epGeoLocation ep
-    oldName   = assetClassValueOf inVal  $ epName ep
-    newName   = assetClassValueOf outVal $ epName ep
-    oldImage = assetClassValueOf inVal $ epImage ep
-    newImage = assetClassValueOf outVal $ epImage ep

@@ -1,0 +1,6 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "explorie:lib:explorie"
+    - path: "./app"
+      component: "explorie:exe:explorie-app"

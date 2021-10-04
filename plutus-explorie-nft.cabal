@@ -1,10 +1,10 @@
 cabal-version: 2.4
 
-name:                   plutus-nft
+name:                   plutus-explorie-nft
 version:                1.0.0
-description:            Lobster naming.
-author:                 Lars Brünjes, Jonathan Fischoff
-maintainer:             jonathangfischoff@gmail.com
+description:            Explorie App.
+author:                 Lars Brünjes, Jonathan Fischoff,  Edwin Tuzar
+maintainer:             tuzaredwin@gmail.com
 license:                Apache-2.0
 license-file:           LICENSE
 build-type:             Simple
@@ -52,14 +52,20 @@ library
 
   exposed-modules:      Cardano.Plutus.Nft
 
-  build-depends:        bytestring
-                      , cardano-api
-                      , plutus-core
-                      , plutus-ledger
-                      , plutus-ledger-api
-                      , plutus-tx
-                      , plutus-tx-plugin
-                      , serialise
+  build-depends:        base >= 4.9 && < 5,
+                        aeson,
+                        bytestring,
+                        containers,
+                        freer-extras,
+                        playground-common,
+                        plutus-contract,
+                        plutus-tx-plugin,
+                        plutus-tx,
+                        plutus-ledger,
+                        cardano-api,
+                        plutus-core,
+                        plutus-ledger-api,
+                        serialise
 
   ghc-options: -fobject-code -fno-ignore-interface-pragmas -fno-omit-interface-pragmas
 
@@ -70,4 +76,4 @@ executable create-nft-script
   ghc-options:          -threaded -rtsopts "-with-rtsopts=-T"
   build-depends:        cardano-api
                       , plutus-ledger
-                      , plutus-nft
+                      , plutus-explorie-nft
