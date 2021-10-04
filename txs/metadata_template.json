@@ -1,0 +1,19 @@
+{
+    "721": {
+      "PLACEHOLDER_POLICY_ID": {
+        "PLACEHOLDER_ASSET_NAME_KEY": {       
+          "name": "PLACEHOLDER_ASSET_NAME",
+          "image": "PLACEHOLDER_IPFS",      
+          "mediaType": "PLACEHOLDER_MEDIA_TYPE",
+          "description": "PLACEHOLDER_DESCRIPTION",
+          "geoLocation": "PLACEHOLDER_GEO_LOCATION",
+          "company": "PLACEHOLDER_COMPANY",
+          "collection": "PLACEHOLDER_COLLECTION",
+          "type": "PLACEHOLDER_TYPE",
+          "rarity": "PLACEHOLDER_RARITY", 
+          "subtitle": "PLACEHOLDER_SUBTITLE"
+        }
+      },
+      "version": "1.0"
+  }
+}

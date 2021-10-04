@@ -13,56 +13,95 @@ fi
 
 source ../../utilScripts/.exp
 
-export CARDANO_NODE_SOCKET_PATH=node.socket
-
 bodyFile=explorie-tx-body.01
 outFile=explorie-tx.01
 nftPolicyFile="../plutus-scripts/mint-nft.plutus"
-nftPolicyId=$(../../utilScripts/09_createPolicyScript.sh $nftPolicyFile)
-value="1 $nftPolicyId.ExplorieNFT"
+nftPolicyId=$(bash ../../utilScripts/09_createPolicyScript.sh $nftPolicyFile)
 walletAddr=$(cat $2)
+declare -A value
+
+while read line; do
+    # echo $line
+    filenameend="$(echo $line | awk 'BEGIN { FS = "~" }; {print $1}' | sed 's/[ |'\'']/_/g')"
+    pathToFile="$(pwd)/metadata/metadata_$filenameend.json"
+
+    cp $3 $pathToFile
+    NFT_NAME=$(echo $line | awk 'BEGIN { FS = "~" }; {print $1}')
+    NFT_IPFS=$(echo $line | awk 'BEGIN { FS = "~" }; {print $2}')
+    NFT_MT=$(echo $line | awk 'BEGIN { FS = "~" }; {print $3}')
+    NFT_DESC=$(echo $line | awk 'BEGIN { FS = "~" }; {print $4}')
+    NFT_GEO=$(echo $line | awk 'BEGIN { FS = "~" }; {print $5}')
+    NFT_CO=$(echo $line | awk 'BEGIN { FS = "~" }; {print $6}')
+    NFT_COL=$(echo $line | awk 'BEGIN { FS = "~" }; {print $7}')
+    NFT_TYPE=$(echo $line | awk 'BEGIN { FS = "~" }; {print $8}')
+    NFT_RARITY=$(echo $line | awk 'BEGIN { FS = "~" }; {print $9}')
+    NFT_SUB=$(echo $line | awk 'BEGIN { FS = "~" }; {print $10}')
+
+    value[$pathToFile]="1 $nftPolicyId.$NFT_NAME"
+
+    echo ${value[$pathToFile]}
+
+    sed -i "s/PLACEHOLDER_POLICY_ID/$nftPolicyId/g" $pathToFile
+    sed -i "s/PLACEHOLDER_ASSET_NAME_KEY/$filenameend/g" $pathToFile
+    sed -i "s/PLACEHOLDER_ASSET_NAME/$NFT_NAME/g" $pathToFile
+    sed -i "s/PLACEHOLDER_IPFS/$NFT_IPFS/g" $pathToFile
+    sed -i "s/PLACEHOLDER_MEDIA_TYPE/$NFT_MT/g" $pathToFile
+    sed -i "s/PLACEHOLDER_DESCRIPTION/$NFT_DESC/g" $pathToFile
+    sed -i "s/PLACEHOLDER_GEO_LOCATION/$NFT_GEO/g" $pathToFile
+    sed -i "s/PLACEHOLDER_COMPANY/$NFT_CO/g" $pathToFile
+    sed -i "s/PLACEHOLDER_COLLECTION/$NFT_COL/g" $pathToFile
+    sed -i "s/PLACEHOLDER_TYPE/$NFT_TYPE/g" $pathToFile
+    sed -i "s/PLACEHOLDER_RARITY/$NFT_RARITY/g" $pathToFile
+    sed -i "s/PLACEHOLDER_SUBTITLE/$NFT_SUB/g" $pathToFile
+    
+    cat $pathToFile
+    echo 
+    echo 
+done < ./populateNFTs.txt
 
 echo "utxo: $1"
 echo "bodyFile: $bodyFile"
 echo "outFile: $outFile"
 echo "nftPolicyFile: $nftPolicyFile"
 echo "nftPolicyId: $nftPolicyId"
-echo "value: $value"
+echo "value: ${value}"
 echo "walletAddress: $walletAddr"
-echo "signing key file: $3"
+echo "metadata template: $3"
+echo "signing key file: $4"
 echo
 
-echo
+for f in $(pwd)/metadata/*.json; do
+    echo
 
-cardano-cli transaction build \
-    --alonzo-era \
-    $NETWORK \
-    --tx-in $1 \
-    --tx-in-collateral $1 \
-    --tx-out $walletAddr" + 1724100 lovelace + "$value \
-    --tx-out-datum-hash 45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0 \
-    --mint "$value" \
-    --mint-script-file $nftPolicyFile \
-    --mint-redeemer-value [] \
-    --change-address $walletAddr \
-    --metadata-json-file $3 \
-    --protocol-params-file mainnet-protocol-parameters.json \
-    --out-file $bodyFile
+    cardano-cli transaction build \
+        --alonzo-era \
+        $NETWORK \
+        --tx-in $1 \
+        --tx-in-collateral $1 \
+        --tx-out "${walletAddr} + 1724100 lovelace + ${value[$f]}" \
+        --mint "${value[$f]}" \
+        --mint-script-file $nftPolicyFile \
+        --mint-redeemer-value [] \
+        --change-address $walletAddr \
+        --metadata-json-file $f \
+        --protocol-params-file ../../txs/protocol-params.json \
+        --out-file $bodyFile
 
-echo "saved transaction to $bodyFile"
+    echo "saved transaction to $bodyFile"
 
-cardano-cli transaction sign \
-    --tx-body-file $bodyFile \
-    --signing-key-file $4 \
-    $NETWORK \
-    --out-file $outFile
+    cardano-cli transaction sign \
+        --tx-body-file $bodyFile \
+        --signing-key-file $4 \
+        $NETWORK \
+        --out-file $outFile
 
-echo "signed transaction and saved as $outFile"
+    echo "signed transaction and saved as $outFile"
 
-cardano-cli transaction submit \
-    $NETWORK \
-    --tx-file $outFile
+    cardano-cli transaction submit \
+        $NETWORK \
+        --tx-file $outFile
 
-echo "submitted transaction"
+    echo "submitted transaction"
 
-echo
+    echo
+done

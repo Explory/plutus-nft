@@ -1,0 +1,19 @@
+{
+    "721": {
+      "": {
+        "McDonaldsNFT": {       
+          "name": "McDonaldsNFT",
+          "image": "15164789a7sa7as987a984as56as4",      
+          "mediaType": "image",
+          "description": "The new Happy Meal is in town",
+          "geoLocation": "51.2775913216048, 7.156849627506552",
+          "company": "McDonald's.co",
+          "collection": "Meals",
+          "type": "voucher",
+          "rarity": "silver", 
+          "subtitle": "McD"
+        }
+      },
+      "version": "1.0"
+  }
+}
