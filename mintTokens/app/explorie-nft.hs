@@ -15,7 +15,7 @@ main :: IO ()
 main = do
     [utxo'] <- getArgs
     let utxo            = parseUTxO utxo'
-        nftPolicyFile   = "../plutus-scripts/mint-nft-policy.plutus"
+        nftPolicyFile   = "plutus-scripts/mint-nft-policy.plutus"
 
     nftPolicyResult <- writeFileTextEnvelope nftPolicyFile Nothing $ apiNFTMintScript utxo
     case nftPolicyResult of

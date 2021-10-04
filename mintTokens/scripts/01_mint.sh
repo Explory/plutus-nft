@@ -15,7 +15,7 @@ source ../../utilScripts/.exp
 
 bodyFile=explorie-tx-body.01
 outFile=explorie-tx.01
-nftPolicyFile="../plutus-scripts/mint-nft.plutus"
+nftPolicyFile="../plutus-scripts/mint-nft-policy.plutus"
 nftPolicyId=$(bash ../../utilScripts/09_createPolicyScript.sh $nftPolicyFile)
 walletAddr=$(cat $2)
 declare -A value
