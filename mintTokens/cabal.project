@@ -6,8 +6,8 @@ packages: ./.
 write-ghc-environment-files: never
 
 -- Always build tests and benchmarks.
-tests: true
-benchmarks: true
+tests: false
+benchmarks: false
 
 -- Plutus revision from 2021/08/16
 source-repository-package
@@ -28,22 +28,8 @@ source-repository-package
     prettyprinter-configurable
     quickcheck-dynamic
     word-array
-    tag: 9280fd9b6186e3a15a6529cd4f0cb8c898830d68
-  --tag: plutus-starter-devcontainer/v1.0.9
-
-
--- The following sections are copied from the 'plutus' repository cabal.project at the revision
--- given above.
--- This is necessary because the  'plutus' libraries depend on a number of other libraries which are
--- not on Hackage, and so need to be pulled in as `source-repository-package`s themselves. Make sure to
--- re-update this section from the template when you do an upgrade.
-
--- We never, ever, want this.
-write-ghc-environment-files: never
-
--- Always build tests and benchmarks.
-tests: true
-benchmarks: true
+  --tag: 9280fd9b6186e3a15a6529cd4f0cb8c898830d68
+  tag: plutus-starter-devcontainer/v1.0.9
 
 -- The only sensible test display option
 test-show-details: streaming

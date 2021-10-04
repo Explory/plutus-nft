@@ -1,6 +1,6 @@
 #!/bin/bas
 
-source .env
+source .exp
 
 explorieAddr=addr_test1vr67uxral3zvq5txnd5jt7xwwf70klcvas3egrsx5cx5z5ghcghul
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source .exp
 
 DATUM_HEX=$(printf "0x%s" $(echo -n $1 | xxd -ps)) \
   && echo -e "$DATUM_HEX" \

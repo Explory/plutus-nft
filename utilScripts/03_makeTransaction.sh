@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source .exp
 
 # build
 cardano-cli transaction build --alonzo-era $NETWORK --tx-in $1 --tx-out $2 --change-address $3 --out-file tx.build

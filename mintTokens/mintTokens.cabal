@@ -30,7 +30,8 @@ common lang
 library
     import: lang
     exposed-modules:
-      Explorie.Minting.MintTokens
+      Explorie.Minting.MintTokens,
+      Explorie.Minting.MintNFT
     build-depends:
       base >= 4.9 && < 5,
       bytestring,
@@ -40,7 +41,11 @@ library
       plutus-contract,
       plutus-tx-plugin,
       plutus-tx,
-      plutus-ledger
+      plutus-ledger,
+      cardano-api,
+      plutus-core,
+      plutus-ledger-api,
+      serialise
     hs-source-dirs: src
 
 executable explorie-tokens
@@ -50,10 +55,33 @@ executable explorie-tokens
   ghc-options:          -threaded -rtsopts "-with-rtsopts=-T"
 
   build-depends:        base >= 4.9 && < 5,
+                        cardano-api -any,
+                        bytestring -any,
                         data-default -any,
                         plutus-contract -any,
                         plutus-pab -any,
                         freer-simple -any,
                         prettyprinter -any,
                         freer-extras -any,
-                        plutus-ledger -any
+                        plutus-ledger -any,
+                        plutus-ledger-api -any,
+                        mintTokens
+
+executable explorie-nft
+  import:               lang
+  hs-source-dirs:       app
+  main-is:              explorie-nft.hs
+  ghc-options:          -threaded -rtsopts "-with-rtsopts=-T"
+
+  build-depends:        base >= 4.9 && < 5,
+                        cardano-api -any,
+                        bytestring -any,
+                        data-default -any,
+                        plutus-contract -any,
+                        plutus-pab -any,
+                        freer-simple -any,
+                        prettyprinter -any,
+                        freer-extras -any,
+                        plutus-ledger -any,
+                        plutus-ledger-api -any,
+                        mintTokens

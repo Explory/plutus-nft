@@ -1,36 +1,30 @@
 import           Prelude
 import           System.Environment
-
-import           Cardano.Api
+import           Cardano.Api       hiding (TxId)
 -- import           Cardano.Api.Shelley
-
 -- import qualified Cardano.Ledger.Alonzo.Data as Alonzo
 import qualified Plutus.V1.Ledger.Api as Plutus
-
 import qualified Data.ByteString.Short as SBS
+import Data.String                         (IsString (..))
+import Ledger
+import Ledger.Bytes                        (getLedgerBytes)
 
-import           Explorie.Minting.MintNFT (mintTokensSBS, mintTokensSerialised)
+import Explorie.Minting.MintNFT
 
 main :: IO ()
 main = do
-  args <- getArgs
-  let nargs = length args
-  let scriptname = if nargs > 0 then head args else "result.plutus"
-  putStrLn $ "Writing output to: " ++ scriptname
-  writePlutusScript scriptname mintTokensSerialised mintTokensSBS
+    [utxo'] <- getArgs
+    let utxo            = parseUTxO utxo'
+        nftPolicyFile   = "../plutus-scripts/mint-nft-policy.plutus"
 
-writePlutusScript :: FilePath -> PlutusScript PlutusScriptV1 -> SBS.ShortByteString -> IO ()
-writePlutusScript filename scriptSerial scriptSBS =
-  do
-  case Plutus.defaultCostModelParams of
-        Just m ->
-          let (logout, e) = Plutus.evaluateScriptCounting Plutus.Verbose m scriptSBS []
-          in do print ("Log output" :: String) >> print logout
-                case e of
-                  Left evalErr -> print ("Eval Error" :: String) >> print evalErr
-                  Right exbudget -> print ("Ex Budget" :: String) >> print exbudget
-        Nothing -> error "defaultCostModelParams failed"
-  result <- writeFileTextEnvelope filename Nothing scriptSerial
-  case result of
-    Left err -> print $ displayError err
-    Right () -> return ()
+    nftPolicyResult <- writeFileTextEnvelope nftPolicyFile Nothing $ apiNFTMintScript utxo
+    case nftPolicyResult of
+        Left err -> print $ displayError err
+        Right () -> putStrLn $ "wrote NFT policy to file " ++ nftPolicyFile
+
+parseUTxO :: String -> TxOutRef
+parseUTxO s =
+  let
+    (x, y) = span (/= '#') s
+  in
+    TxOutRef (TxId $ getLedgerBytes $ fromString x) $ read $ tail y

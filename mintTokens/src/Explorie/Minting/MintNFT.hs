@@ -1,66 +1,71 @@
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE DeriveAnyClass      #-}
-{-# LANGUAGE DeriveGeneric       #-}
-{-# LANGUAGE FlexibleContexts    #-}
-{-# LANGUAGE NoImplicitPrelude   #-}
-{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell     #-}
-{-# LANGUAGE TypeApplications    #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
-module Cardano.PlutusExample.MintNFT where
+module Explorie.Minting.MintNFT 
+    ( apiNFTMintScript
+    , nftTokenName
+    ) where
 
-  import           Cardano.Api.Shelley    (PlutusScript (..), PlutusScriptV1)
-  import           Codec.Serialise
-  import qualified Data.ByteString.Short  as SBS
-  import qualified Data.ByteString.Lazy   as LBS
-  import qualified PlutusTx
-  import           PlutusTx.Prelude       hiding (Semigroup(..), unless)
-  import           Ledger                 hiding (mint, singleton)
-  import qualified Ledger.Typed.Scripts   as Scripts
-  import           Ledger.Value           as Value
+import           Cardano.Api.Shelley    (PlutusScript (..), PlutusScriptV1)
+import           Codec.Serialise
+import qualified Data.ByteString.Short  as SBS
+import qualified Data.ByteString.Lazy   as LBS
+import qualified PlutusTx
+import           PlutusTx.Builtins      (modInteger)
+import           PlutusTx.Prelude       hiding (Semigroup(..), unless)
+import           Ledger                 hiding (mint, singleton)
+import qualified Ledger.Typed.Scripts   as Scripts
+import           Ledger.Value           as Value
+import qualified Plutus.V1.Ledger.Scripts as Plutus
+import           Prelude                  (Show)
 
-  {-# INLINABLE mintTokens #-}
-  mintTokens :: Integer -> ScriptContext -> Bool
-  mintTokens amt ctx =
-      traceIfFalse "wrong currency symbol" checkMintedSymbol
-      && traceIfFalse "wrong amount minted" checkMintedAmount
-    where
-      info :: TxInfo
-      info = scriptContextTxInfo ctx
+{-# INLINABLE mkNFTPolicy #-}
+mkNFTPolicy :: TokenName -> TxOutRef -> BuiltinData -> ScriptContext -> Bool
+mkNFTPolicy tn utxo _ ctx = traceIfFalse "UTxO not consumed"   hasUTxO           &&
+                            traceIfFalse "wrong amount minted" checkMintedAmount
+  where
+    info :: TxInfo
+    info = scriptContextTxInfo ctx
 
-      checkMintedSymbol :: Bool
-      checkMintedSymbol = case flattenValue (txInfoMint info) of
-          [(cs', _, _)] -> cs' == ownCurrencySymbol ctx
-          _             -> False
+    hasUTxO :: Bool
+    hasUTxO = any (\i -> txInInfoOutRef i == utxo) $ txInfoInputs info
 
-      checkMintedAmount :: Bool
-      checkMintedAmount = case flattenValue (txInfoMint info) of
-          [(_, _, amt')] -> amt' == amt && (amt == 1 || amt == (-1))
-          _              -> False
+    checkMintedAmount :: Bool
+    checkMintedAmount = case flattenValue (txInfoMint info) of
+        [(_, tn', amt)] -> tn' == tn && amt == 1
+        _               -> False
 
-  mintingPolicy :: Scripts.MintingPolicy
-  mintingPolicy = mkMintingPolicyScript $$(PlutusTx.compile [|| Scripts.wrapMintingPolicy mintTokens ||])
+nftTokenName:: TokenName
+nftTokenName = "ExplorieNFT"
 
-  {-
-      As a Script
-  -}
+nftPolicy :: TxOutRef -> Scripts.MintingPolicy
+nftPolicy utxo = mkMintingPolicyScript $
+    $$(PlutusTx.compile [|| \tn utxo' -> Scripts.wrapMintingPolicy $ mkNFTPolicy tn utxo' ||])
+    `PlutusTx.applyCode`
+     PlutusTx.liftCode nftTokenName
+    `PlutusTx.applyCode`
+     PlutusTx.liftCode utxo
 
-  mintTokensScript :: Script
-  mintTokensScript = unMintingPolicyScript mintingPolicy
+nftPlutusScript :: TxOutRef -> Script
+nftPlutusScript = unMintingPolicyScript . nftPolicy
 
-  {-
-      As a Short Byte String
-  -}
+nftValidator :: TxOutRef -> Validator
+nftValidator = Validator . nftPlutusScript
 
-  mintTokensSBS :: SBS.ShortByteString
-  mintTokensSBS =  SBS.toShort . LBS.toStrict $ serialise mintTokensScript
+nftScriptAsCbor :: TxOutRef -> LBS.ByteString
+nftScriptAsCbor = serialise . nftValidator
 
-  {-
-      As a Serialised Script
-  -}
-
-  mintTokensSerialised :: PlutusScript PlutusScriptV1
-  mintTokensSerialised = PlutusScriptSerialised mintTokensSBS
+apiNFTMintScript :: TxOutRef -> PlutusScript PlutusScriptV1
+apiNFTMintScript = PlutusScriptSerialised . SBS.toShort . LBS.toStrict . nftScriptAsCbor

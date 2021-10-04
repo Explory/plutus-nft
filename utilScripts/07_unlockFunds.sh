@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source .exp
 
 #$1 TX_SCRIPT
 #$2 PLUTUS_SCRIPT

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source .env
+source .exp
 
 cardano-cli query protocol-parameters $NETWORK > protocol-params.json

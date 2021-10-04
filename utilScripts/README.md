@@ -1,7 +1,7 @@
 # How to run the scripts
 
 #Pre-required
-Modify .env for your need
+Modify .exp for your need
 ### can add mainnet instead
 
 ## 00_createWallet.sh

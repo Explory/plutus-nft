@@ -13,7 +13,7 @@
 
 -- This solution has been contributed by George Flerovsky
 
-module Cardano.PlutusExample.MintTokens
+module Explorie.Minting.MintTokens
   ( mintTokensSBS
   , mintTokensSerialised
   ) where
@@ -45,7 +45,7 @@ mintTokens :: MintingParams -> Integer -> ScriptContext -> Bool
 mintTokens prms amt ctx =
     traceIfFalse "wrong currency symbol" checkMintedSymbol
     && traceIfFalse "wrong amount minted" checkMintedAmount
-    && traceIfFalse "owner has not signed" checkOwnerHasSigned
+    -- && traceIfFalse "owner has not signed" checkOwnerHasSigned
   where
     info :: TxInfo
     info = scriptContextTxInfo ctx
